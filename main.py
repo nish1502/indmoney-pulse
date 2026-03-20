@@ -36,7 +36,10 @@ def run_phase1():
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
         
-    raw_reviews = fetch_reviews(package_name="in.indwealth", count=200)
+    # Corrected signature: fetch_reviews(package_name="in.indwealth", weeks=12)
+    raw_reviews = fetch_reviews(package_name="in.indwealth", weeks=12)
+    logger.info(f"Fetched {len(raw_reviews)} reviews from last 12 weeks")
+    
     if not raw_reviews:
         raise Exception("No reviews fetched during Phase 1.")
         

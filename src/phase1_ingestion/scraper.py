@@ -1,4 +1,10 @@
+from google_play_scraper import reviews, Sort
+import logging
 from datetime import datetime, timedelta
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 def fetch_reviews(package_name="in.indwealth", weeks=12):
     """
