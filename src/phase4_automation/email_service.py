@@ -1,4 +1,5 @@
 import os
+import json
 import smtplib
 import logging
 import re
@@ -30,18 +31,36 @@ def load_report(file_path="output/v3_weekly_pulse.md"):
 
 def format_email(content):
     """
-    Convert markdown to clean readable text for email body.
-    Removes headers (#) and keeps structure.
+    Format content including trends and impact scores.
     """
     if not content:
         return ""
     
+    # 1. Load context from Phase 3 results
+    trends_content = ""
+    if os.path.exists("output/v3_trends.json"):
+        with open("output/v3_trends.json", 'r', encoding='utf-8') as f:
+            trends_data = json.load(f)
+            trends_content = "\n--- TRENDS ---\n"
+            for theme, info in trends_data.items():
+                trends_content += f"{theme}: {info['current_pct']}% ({info['direction']} {abs(info['change'])}%)\n"
+
+    impact_content = ""
+    if os.path.exists("output/v3_impact.json"):
+        with open("output/v3_impact.json", 'r', encoding='utf-8') as f:
+            impact_data = json.load(f)
+            impact_content = "\n--- TOP CRITICAL ISSUES ---\n"
+            for theme, score in impact_data:
+                impact_content += f"- {theme} (Impact Score: {score})\n"
+
+    # 2. Format Body
     # Remove markdown headers (#)
     cleaned = re.sub(r'#+\s*(.*)', r'\1', content)
     # Remove bold (**)
     cleaned = re.sub(r'\*\*(.*?)\*\*', r'\1', cleaned)
     
-    return cleaned.strip()
+    final_body = f"{cleaned.strip()}\n\n{trends_content}\n{impact_content}"
+    return final_body
 
 def send_email():
     """
@@ -86,7 +105,7 @@ def send_email():
     except smtplib.SMTPAuthenticationError:
         logger.error("Authentication failed. Please check your EMAIL_ID and App Password.")
     except Exception as e:
-        logger.error(f"Failed to send email: {e}")
+        logger.error(f"EMAIL FAILED: {e}")
 
 if __name__ == "__main__":
     send_email()

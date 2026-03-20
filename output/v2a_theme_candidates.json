@@ -2,11 +2,9 @@
   {
     "batch_id": 1,
     "themes": [
-      "Tracking Features",
-      "Hidden Charges",
-      "KYC Process",
-      "App Performance",
-      "Investment Options"
+      "Poor Customer Service",
+      "Hidden Charges Issue",
+      "Investment Tracking Features"
     ]
   },
   {
@@ -14,37 +12,37 @@
     "themes": [
       "Poor Customer Support",
       "App Technical Issues",
-      "Payment Processing Errors",
-      "Lack Of Features",
-      "High Charges"
+      "Fees And Charges",
+      "Payment Failures",
+      "Lack Of Features"
     ]
   },
   {
     "batch_id": 3,
     "themes": [
+      "App Functionality Issues",
       "Poor Customer Support",
-      "App Glitches Issues",
-      "Trading Chart Features",
-      "Investment Transparency",
-      "User Interface Problems"
+      "Trading Experience Problems"
     ]
   },
   {
     "batch_id": 4,
     "themes": [
       "App Performance Issues",
-      "Trading Platform Problems",
       "Investment Options Limited",
-      "User Interface Flaws",
-      "Bank Account Restrictions"
+      "Poor User Experience",
+      "Trading Platform Issues",
+      "Fees and Charges"
     ]
   },
   {
     "batch_id": 5,
     "themes": [
-      "Easy To Use",
+      "Bank Account Issues",
+      "User Interface",
+      "Trading Fees",
       "SIP Management",
-      "User Interface"
+      "Ease Of Use"
     ]
   }
 ]

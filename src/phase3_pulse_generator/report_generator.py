@@ -68,10 +68,10 @@ You are a Product Manager at INDMoney. Based on the following app review data, g
 ### Strict Requirements (PM Summary Rules):
 1. Max 250 words, NO fluff, NO generic "mixed feedback" lines.
 2. TONE: Senior Product Manager executive summary.
-3. TOP THEMES: List 3–5 themes with percentages. Ensure at least one Action Item addresses the top theme.
-4. USER VOICES: 3–5 real quotes highlighting actual friction points (not general praise).
+3. TOP THEMES: List EXACTLY 3 themes with percentages. Ensure at least one Action Item addresses the TOP theme.
+4. USER VOICES: List EXACTLY 3 real quotes highlighting actual friction points (not general praise).
 5. ACTION IDEAS (CRITICAL):
-   - Provide 3–4 PRIORITIZED action items.
+   - Provide EXACTLY 3 PRIORITIZED action items.
    - Include priority labels: [HIGH], [MEDIUM], [LOW].
    - RULE: The highest priority [HIGH] action must address FINANCIAL RISK or TRANSACTION FAILURE if present in reviews.
    - RULE: Every action must be specific (e.g., "Restore EPF/NPS manual tracking" instead of "Improve account flows").

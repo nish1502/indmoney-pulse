@@ -89,15 +89,29 @@ Themes: [{themes_str}]
             )
             
             content = response.choices[0].message.content
-            classified = json.loads(content)
             
-            # Handle if LLM wrapped it in an object
+            try:
+                classified = json.loads(content)
+            except Exception as json_err:
+                logger.error(f"Failed to parse LLM JSON response: {json_err}. Content: {content}")
+                if attempt < max_retries - 1:
+                    time.sleep(2 ** attempt)
+                    continue
+                else:
+                    return []
+            
+            # Handle if LLM wrapped it in an object (ensure we have a list)
             if isinstance(classified, dict):
-                 # Find the list within the dict
+                 # Common keys Llama might use: "reviews", "results", etc.
+                 found_list = False
                  for key in classified:
                      if isinstance(classified[key], list):
                          classified = classified[key]
+                         found_list = True
                          break
+                 if not found_list:
+                     logger.warning(f"No list found in dictionary response: {classified}")
+                     return []
             
             # Validation: Ensure the number of reviews matches and themes are valid
             valid_classified = []

@@ -15,8 +15,10 @@ from src.phase2_theme_engine.extractor import run_phase2a
 from src.phase2_theme_engine.consolidator import run_phase2b
 from src.phase2_theme_engine.classifier import run_phase2c
 
-# Phase 3: Pulse Report Generation
+# Phase 3: Pulse Report Generation & Analysis
 from src.phase3_pulse_generator.report_generator import run_phase3
+from src.phase3_pulse_generator.trend_analyzer import run_trend_analyzer
+from src.phase3_pulse_generator.impact_scorer import run_impact_scorer
 
 # Phase 4: Email Automation
 from src.phase4_automation.email_service import send_email
@@ -65,6 +67,14 @@ def main():
         run_phase2b()
         logger.info("Phase 2B completed.")
         
+        # 1. Rotate previous classification file for trend analysis
+        p2c_output = "output/v2c_classified_reviews.json"
+        p2c_prev = "output/v2c_previous.json"
+        if os.path.exists(p2c_output):
+            import shutil
+            shutil.copy(p2c_output, p2c_prev)
+            logger.info("Previous run found. Rotated data for trend analysis.")
+
         # Phase 2C: Review Classification (Groq)
         logger.info(">>> Starting Phase 2C: Review Classification...")
         run_phase2c()
@@ -73,7 +83,13 @@ def main():
         # Phase 3: Report Synthesis (Gemini)
         logger.info(">>> Starting Phase 3: Pulse Report Synthesis...")
         run_phase3()
-        logger.info("Phase 3 completed.")
+        
+        # Phase 3B: Trend & Impact Analysis
+        logger.info(">>> Starting Trend Analysis and Impact Scoring...")
+        run_trend_analyzer()
+        run_impact_scorer()
+        
+        logger.info("Phase 3 complete.")
         
         # Phase 4: Email Delivery (SMTP)
         logger.info(">>> Starting Phase 4: Email Delivery...")

@@ -72,7 +72,7 @@ Consolidate them into exactly 5 SHARP product themes.
 """
 
     # We use Gemini 2.5 Flash as requested.
-    model_name = "models/gemini-2.5-flash"
+    model_name = "models/gemini-1.5-flash"
     generation_config = {
         "temperature": 0.1,
         "top_p": 0.95,

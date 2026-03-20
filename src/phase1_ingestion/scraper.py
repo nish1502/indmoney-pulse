@@ -1,36 +1,49 @@
-from google_play_scraper import reviews, Sort
-import logging
+from datetime import datetime, timedelta
 
-# Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
-
-def fetch_reviews(package_name="in.indwealth", count=200):
+def fetch_reviews(package_name="in.indwealth", weeks=12):
     """
-    Fetch the latest reviews for a specific Google Play Store package.
+    Fetch reviews from the last N weeks.
+    Includes rating (score) and title in the output.
     """
-    logger.info(f"Fetching up to {count} reviews for {package_name}...")
+    logger.info(f"Fetching reviews for {package_name} from the last {weeks} weeks...")
+    limit_date = datetime.now() - timedelta(weeks=weeks)
+    
+    all_raw_reviews = []
+    continuation_token = None
     
     try:
-        # Fetch reviews using google-play-scraper
-        result, _ = reviews(
-            package_name,
-            lang='en', # Try to fetch English primarily from the store
-            country='in',
-            sort=Sort.NEWEST,
-            count=count
-        )
-        
-        raw_reviews = []
-        for r in result:
-            # Map the necessary fields: "review" and "date" (ISO format string)
-            raw_reviews.append({
-                "review": r.get("content", ""),
-                "date": r.get("at").isoformat() if r.get("at") else None
-            })
+        # We may need multiple calls to get 12 weeks of data
+        # Fetching 400 at a time
+        while True:
+            result, continuation_token = reviews(
+                package_name,
+                lang='en',
+                country='in',
+                sort=Sort.NEWEST,
+                count=400,
+                continuation_token=continuation_token
+            )
             
-        logger.info(f"Successfully fetched {len(raw_reviews)} raw reviews.")
-        return raw_reviews
+            reached_limit = False
+            for r in result:
+                dt = r.get("at")
+                if dt and dt < limit_date:
+                    reached_limit = True
+                    break
+                
+                # Map fields: "review" (text), "date", "rating", "title"
+                all_raw_reviews.append({
+                    "review": r.get("content", ""),
+                    "date": dt.isoformat() if dt else None,
+                    "rating": r.get("score", 0),
+                    "title": r.get("reviewId", "") # Play Store doesn't have titles, using ID as unique ref
+                })
+            
+            if reached_limit or not continuation_token or len(all_raw_reviews) >= 1000:
+                break
+                
+        logger.info(f"Successfully fetched {len(all_raw_reviews)} reviews from the last {weeks} weeks.")
+        return all_raw_reviews
         
     except Exception as e:
         logger.error(f"Error while fetching reviews: {e}")
