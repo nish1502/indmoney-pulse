@@ -106,6 +106,10 @@ def execute_pipeline():
         status_manager.error_message = str(e)
         logger.error(f"PIPELINE FAILED: {e}")
 
+@app.get("/")
+def read_root():
+    return {"message": "INDMoney Pulse API is Live. Use /docs for API documentation."}
+
 # API ENDPOINTS
 
 @app.get("/health")
