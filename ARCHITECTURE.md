@@ -1,115 +1,139 @@
-# INDMoney App Review Pulse: Architecture & Roadmap
+# INDMoney Pulse: Production Architecture
 
-This document outlines the phased architecture, data flow, and technical stack for the automated **INDMoney Weekly Product Pulse** pipeline.
+This document outlines the production-ready full-stack architecture for the **INDMoney Weekly Product Pulse** system. 
 
-## 🏗️ Phase-Wise Architecture
-
-The pipeline is divided into modular phases, orchestrated by a central `main.py`.
-
-### Phase 1: Ingestion & Cleaning
-- **Objective:** Scrape latest reviews and prepare them for analysis by removing noise and sensitive data.
-- **Logic:**
-    - Use `google-play-scraper` to fetch up to 200 recent reviews for `com.indmoney.app`.
-    - Filter: Language must be English.
-    - Filter: Remove reviews with fewer than 5 words.
-    - Anonymization: Remove potential PII (emails, phone numbers) using regex.
-- **Output:** `output/v1_raw_reviews.json`
-
-### Phase 2: Theme Discovery (Groq + Gemini 2.5 Flash)
-- **Objective:** Discover, consolidate, and classify reviews into 3–5 distinct product themes.
-
-#### Phase 2A: Batch Theme Extraction (Groq)
-- **Logic:** Process reviews in batches (e.g., 20 per batch).
-- **Constraints:**
-    - Extract 3–5 themes per batch.
-    - Each theme must be **2–3 words only**.
-    - **No vague themes** like "general", "other", or "misc".
-    - **No duplicates** or overlapping themes within a single batch.
-- **Output:** `output/v2a_theme_candidates.json`
-
-#### Phase 2B: Theme Consolidation (Gemini 2.5 Flash)
-- **Logic:** Merge all candidates from 2A into a final set of **3–5 themes** (prefers 5 if meaningful).
-- **Constraints:**
-    - Ensure **no overlapping meanings** between themes.
-    - Create clear, distinct categories with consistent naming.
-- **Output:** `output/v2b_consolidated_themes.json`
-
-#### Phase 2C: Review Classification (Groq)
-- **Logic:** High-speed mapping of all original reviews to the final themes.
-- **Constraints:**
-    - **Each review must be assigned exactly ONE theme**.
-    - Must choose from the final 3–5 themes only; **no new themes allowed**.
-- **Output:** `output/v2c_classified_reviews.json`
-
-### Phase 3: Pulse Report Synthesis (Gemini 2.5 Flash)
-- **Objective:** Generate a high-level executive summary of the week’s sentiment.
-- **Constraints:**
-    - **Avoid generic summaries**; focus on specific pain points and wins.
-    - **Use real user language** (referencing specific phrases from reviews).
-    - **Action Items must be specific and actionable** (e.g., "Fix KYC button lag" instead of "Improve UI").
-    - **Constraint:** ≤250 words.
-- **Output:** `output/v3_weekly_pulse.md`
-
-### Phase 4: Email Automation
-- **Objective:** Dispatch the report to the team.
-- **Logic:** Convert `weekly_pulse.md` into a styled email and send via Gmail SMTP.
-
-### Phase 5: Interface (CLI + Web UI)
-- **Objective:** Manual triggers, monitoring, and report preview using **Streamlit**.
-
-### Phase 6: Scheduler (GitHub Actions)
-- **Objective:** Automate the pipeline via CRON on a weekly basis.
+The system is transitioning from a standalone Python script into a robust API-first application with a React-based frontend and containerized backend.
 
 ---
 
-## 🔄 Orchestrator Flow (main.py)
+## 🏗️ System Overview
 
-The `main.py` script serves as the central controller, ensuring a linear execution of all phases:
+The updated architecture separates the pipeline logic into a stateless FastAPI backend and a dynamic Next.js frontend, orchestrated via Docker and automated by GitHub Actions.
 
-1.  **Phase 1 (Scraper):** Fetch & Clean → `v1_raw_reviews.json`
-2.  **Phase 2A (Extractor):** Batch extraction → `v2a_theme_candidates.json`
-3.  **Phase 2B (Consolidator):** Merge themes → `v2b_consolidated_themes.json`
-4.  **Phase 2C (Classifier):** Assign reviews → `v2c_classified_reviews.json`
-5.  **Phase 3 (Report):** Synthesize findings → `v3_weekly_pulse.md`
-6.  **Phase 4 (Email):** Dispatch to Stakeholders
+### 🧩 High-Level System Diagram
 
----
-
-## 📂 Folder Structure
-
-```text
-indmoney-pulse/
-├── src/
-│   ├── phase1_ingestion/       # Scraping & cleaning
-│   ├── phase2_theme_engine/    # Multi-step discovery
-│   │   ├── extractor.py        # 2A: Batch extraction (Groq)
-│   │   ├── consolidator.py     # 2B: Theme reduction (Gemini)
-│   │   └── classifier.py       # 2C: Categorization logic (Groq)
-│   ├── phase3_pulse_generator/ # Gemini report synthesis
-│   ├── phase4_automation/      # Email service
-│   └── phase5_interface/       # Streamlit & CLI
-├── output/                     # Storable intermediate data (v1 to v3)
-├── .github/workflows/          # Phase 6: Scheduling
-│   └── weekly_pulse.yml
-├── config/                     # Settings (gitignored)
-├── main.py                     # Central orchestrator
-└── requirements.txt
+```mermaid
+graph TD
+    User([User/Browser]) <--> Frontend[Next.js Frontend - Vercel]
+    GitHubActions[GitHub Actions Scheduler] -- 1. GET /status --> Backend
+    GitHubActions -- 2. POST /run --> Backend
+    Frontend -- API Polling --> Backend[FastAPI Backend - Railway/Docker]
+    
+    subgraph "FastAPI Backend Layer"
+        Backend --> Pipeline[Core Processing Pipeline]
+        Pipeline --> P1[Phase 1: Ingestion & Cleaning]
+        Pipeline --> P2[Phase 2: Theme Engine (Groq/Gemini)]
+        Pipeline --> P3[Phase 3: Pulse Generator (Gemini)]
+        Pipeline --> P4[Phase 4: Email Automation]
+        
+        P1 -- Writing --> Data[(/output JSON/MD Store)]
+        P3 -- Reading/Writing --> Data
+        P4 -- Reading --> Data
+    end
+    
+    subgraph "External Services"
+        P2 --- GroqAPI(Groq Llama-3-70b)
+        P2 --- GeminiAPI(Gemini 2.5 Flash)
+        P3 --- GeminiAPI
+        P4 --- SMTP(Gmail SMTP Service)
+    end
 ```
 
 ---
 
-## 🛠️ Tech Stack
+## 🚀 Layered Architecture
 
-| Component | Technology |
-| :--- | :--- |
-| **Language** | Python 3.10+ |
-| **Classification LLM** | **Groq (Llama-3-70b)** - Ultra-fast batch processing. |
-| **Synthesis LLM** | **Gemini 2.5 Flash** - Consolidation & report generation. |
-| **Interface** | **Streamlit** |
-| **Email** | **Gmail SMTP** |
-| **Scheduler** | **GitHub Actions** |
+### 1. Backend Layer (FastAPI)
+The central orchestrator transitions from `main.py` to a FastAPI service running in a Docker container.
 
-## 🔒 Constraints & Security
-- **Theme Count:** 3–5 themes (flexible, data-driven).
-- **PII:** Scrubbed in Phase 1 before LLM ingestion.
-- **Data Persistence:** JSON outputs are saved at every sub-phase for auditing.
+#### API Design (RESTful)
+| Endpoint | Method | Description |
+| :--- | :--- | :--- |
+| `/run` | `POST` | Triggers the full pipeline as a **background task**. Returns immediately. |
+| `/status` | `GET` | Returns current system state (`idle`, `running`, `failed`) and last run metadata. |
+| `/report` | `GET` | Fetches the latest synthesized report and theme data. |
+| `/send-email` | `POST` | Sends the current report to a specified email address. |
+| `/health` | `GET` | Returns system status and API uptime. |
+
+### 🛠️ Key Architectural Controls
+
+#### A. Execution Model
+The pipeline is executed as a **non-blocking background task** using FastAPI's `BackgroundTasks`. 
+- When `/run` is called, the server acknowledges the request with a `202 Accepted` status and starts the pipeline.
+- The main thread is never blocked, ensuring the API remains responsive.
+
+#### B. Status Tracking & Polling
+System state is managed via a dedicated `/status` endpoint.
+- **States:** `idle` (ready), `running` (in-progress), `failed` (error encountered).
+- **Metadata:** Includes `last_run_timestamp` and `last_run_status`.
+- **Client Behavior:** The Next.js frontend uses **polling** (every 3–5 seconds) to check the status rather than persistent WebSockets.
+
+#### C. Concurrency Control
+To prevent data corruption and resource exhaustion, the system enforces a **Single Execution Rule**:
+- Only one pipeline run is allowed at any given time.
+- An in-memory lock (Boolean flag) tracks the active state.
+- If `/run` is triggered while the state is `running`, the API returns a `409 Conflict` or simply ignores the request.
+
+#### D. Failure Handling
+The pipeline follows a "Fail Fast" principle:
+- If any phase (1–4) fails, the entire pipeline execution **stops immediately**.
+- The error is captured and logged for debugging.
+- The `/status` endpoint reflects the `failed` state.
+- **Data Integrity:** Since each phase writes to its own versioned file (`v1`, `v2`, etc.), a failure in a later phase does not overwrite or corrupt the successful outputs from the previous run.
+
+---
+
+### 2. Frontend Layer (Next.js)
+A modern, responsive web interface built with Next.js and Tailwind CSS.
+
+**Core UI Features:**
+- **Dashboard Overview:** Displays top themes, impact scores, and sentiment trends.
+- **Report Viewer:** Renders the full markdown report dynamically.
+- **Control Center:** Manual trigger button for the pipeline and email delivery.
+- **Progress Tracking:** Uses polling on `/status` to show real-time stage updates to the user.
+
+---
+
+## 📂 Updated Folder Structure
+
+```text
+indmoney-pulse/
+├── backend/                    # Containerized FastAPI Service
+│   ├── src/                    # Core Pipeline Logic (Phases 1-4)
+│   ├── api/                    # FastAPI Routes & Status Management
+│   ├── main.py                 # FastAPI Entry point
+│   ├── Dockerfile              # Backend Container Configuration
+│   └── requirements.txt        # Backend Dependencies
+├── frontend/                   # Next.js Application
+│   ├── components/             # Reusable UI Blocks
+│   ├── pages/                  # Route-based Views
+│   └── public/                 # Static Assets
+├── output/                     # JSON & Markdown Data Store (Ephemeral)
+├── .github/workflows/          # Deployment & Automation
+│   ├── deploy-backend.yml      # Railway Deploy
+│   ├── deploy-frontend.yml     # Vercel Deploy
+│   └── weekly-run.yml          # Scheduler: Checks status -> Triggers /run
+└── .env                        # Environment Variables (Gitignored)
+```
+
+---
+
+## 🛠️ Infrastructure & Deployment
+
+### Data Persistence Notice
+The `/output` directory is mapped as a local volume in Docker. However, in standard Railway/Docker deployments, this storage is **ephemeral**. 
+- Data will persist across container restarts but may be lost on new deployments or if the disk is wiped.
+- This is acceptable for the current prototype/demo phase; future versions may require S3 or a database for long-term retention.
+
+### Scheduling (GitHub Actions)
+The weekly scheduler is updated to be status-aware:
+1. Call `GET /status`.
+2. Proceed to call `POST /run` **only if** the status is `idle`.
+3. Log an alert if the system is stuck in `running` or `failed` state.
+
+---
+
+## 🛡️ Non-Functional Requirements
+- **Simplicity:** No complex message queues or external databases are required.
+- **Security:** API keys and credentials managed via cloud-native secrets.
+- **Separation of Concerns:** Frontend is entirely decoupled from Python-specific logic.

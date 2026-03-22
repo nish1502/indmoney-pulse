@@ -6,3 +6,6 @@ streamlit
 python-dotenv
 pyyaml
 pandas
+fastapi
+uvicorn
+python-multipart

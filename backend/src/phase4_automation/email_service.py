@@ -62,9 +62,10 @@ def format_email(content):
     final_body = f"{cleaned.strip()}\n\n{trends_content}\n{impact_content}"
     return final_body
 
-def send_email():
+def send_email(recipient: str = None):
     """
     Orchestrate the process and send via Gmail SMTP.
+    If recipient is provided, use it. Otherwise, fallback to EMAIL_ID.
     """
     # 1. Load report
     content = load_report()
@@ -87,25 +88,19 @@ def send_email():
     # 4. Prepare email message
     msg = MIMEMultipart()
     msg['From'] = email_id
-    msg['To'] = email_id # Self-send as per requirements
+    msg['To'] = recipient if recipient else email_id # Use custom recipient if provided
     msg['Subject'] = "INDMoney Weekly Product Pulse"
     
     msg.attach(MIMEText(formatted_body, 'plain'))
     
     # 5. Send using smtplib
-    try:
-        with smtplib.SMTP(smtp_server, smtp_port) as server:
-            server.set_debuglevel(0) # Set to 0 for clean production output
-            server.starttls()
-            server.login(email_id, email_password)
-            server.send_message(msg)
-            
-        logger.info("Email sent successfully.")
+    with smtplib.SMTP(smtp_server, smtp_port) as server:
+        server.set_debuglevel(0) # Set to 0 for clean production output
+        server.starttls()
+        server.login(email_id, email_password)
+        server.send_message(msg)
         
-    except smtplib.SMTPAuthenticationError:
-        logger.error("Authentication failed. Please check your EMAIL_ID and App Password.")
-    except Exception as e:
-        logger.error(f"EMAIL FAILED: {e}")
+    logger.info("Email sent successfully.")
 
 if __name__ == "__main__":
     send_email()

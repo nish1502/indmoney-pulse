@@ -1,48 +1,30 @@
 [
   {
-    "batch_id": 1,
+    "batch": 1,
     "themes": [
-      "Poor Customer Service",
-      "Hidden Charges Issue",
-      "Investment Tracking Features"
+      "Payment Issues",
+      "Customer Support",
+      "User Experience",
+      "Features and Fees",
+      "Portfolio Tracking"
     ]
   },
   {
-    "batch_id": 2,
+    "batch": 2,
     "themes": [
-      "Poor Customer Support",
-      "App Technical Issues",
-      "Fees And Charges",
-      "Payment Failures",
-      "Lack Of Features"
+      "Hidden Charges",
+      "Poor Service",
+      "Good Design",
+      "Us Stocks",
+      "Bad Experience"
     ]
   },
   {
-    "batch_id": 3,
+    "batch": 3,
     "themes": [
-      "App Functionality Issues",
-      "Poor Customer Support",
-      "Trading Experience Problems"
-    ]
-  },
-  {
-    "batch_id": 4,
-    "themes": [
-      "App Performance Issues",
-      "Investment Options Limited",
-      "Poor User Experience",
-      "Trading Platform Issues",
-      "Fees and Charges"
-    ]
-  },
-  {
-    "batch_id": 5,
-    "themes": [
-      "Bank Account Issues",
-      "User Interface",
-      "Trading Fees",
-      "SIP Management",
-      "Ease Of Use"
+      "User Experience",
+      "Technical Issue",
+      "Customer Support"
     ]
   }
 ]
