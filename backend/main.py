@@ -58,7 +58,7 @@ def run_phase1():
     logger.info(">>> Starting Phase 1: Ingestion & Cleaning...")
     output_dir = "output"
     if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
+        os.makedirs(output_dir, exist_ok=True)
         
     raw_reviews = fetch_reviews(package_name="in.indwealth", weeks=12) 
     if not raw_reviews:
