@@ -60,7 +60,7 @@ def run_phase1():
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
         
-    raw_reviews = fetch_reviews(package_name="in.indwealth", weeks=1) # Limit for now
+    raw_reviews = fetch_reviews(package_name="in.indwealth", weeks=12) 
     if not raw_reviews:
         raise Exception("No reviews fetched during Phase 1.")
         
@@ -169,4 +169,5 @@ def trigger_email(req: EmailRequest):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    port = int(os.getenv("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
