@@ -1,16 +1,18 @@
 ## INDMoney Weekly Pulse
 
 ### Top Themes
-- **Account Issues (44.0%)**: Users are expressing frustration with account problems, delayed refunds, and poor customer support.
-- **App Performance (34.0%)**: Users are criticizing the app's cluttered interface, poor UI, and technical glitches affecting trading features.
-- **Trading Features (16.0%)**: Users are asking for improvements to the portfolio section, manual tracking options, and additional features like basket purchase for mutual funds.
+- **App Performance** (41.4%)
+- **Account Issues** (35.8%)
+- **Trading Features** (16.6%)
+- **High Charges** (4.9%)
+- **Payments & Rewards** (1.3%)
 
 ### User Voices
-- "Worst app... I recommend all peoples Angel one is best."
-- "IND money Team can update the portfolio section because it's now complex..."
-- "don't install and don't open account hidden charges and brokerage charges"
+- "_The interface is very much cluttered and font size is kind of very bigger. it's good to track india stock, US stocks and Mutual fund all in one place which is good but it doesn't provide rich UI._"
+- "_Worst app. I was install the app before 6 months. Still now i can't add my bank details. They push to open Federal bank account._"
+- "_fantastic idea of future and option trading_"
 
 ### Action Ideas
-1. **[HIGH] Improve Customer Support and Refund Process**: Tackle the pressing issue of account problems, delayed refunds, and poor customer support by retraining customer service agents and refining the refund process.
-2. **[MEDIUM] Enhance App Performance and UI**: Conduct a thorough UI analysis to identify areas for improvement and implement changes to provide a better user experience.
-3. **[LOW] Expand Trading Features**: Investigate users' feedback on trading features and implement improvements, such as manual tracking options and basket purchase for mutual funds.
+1. **[HIGH]** **Resolve App Performance Issues by Implementing a User-Friendly UI and Redesigning the Navigation Bar**: Addressing the cluttered interface and font size issues will significantly improve the user experience.
+2. **[MEDIUM]** **Improve User Onboarding Flow for Bank Account Addition**: Enhance the onboarding process to reduce the time it takes to add a bank account and make it more user-friendly.
+3. **[LOW]** **Implement Additional Payment Methods**: Introduce more payment options, such as UPI, to increase user convenience and expand the app's reach.

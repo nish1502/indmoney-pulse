@@ -57,6 +57,9 @@ def run_phase1():
     """Ingest latest reviews, clean them, and save."""
     logger.info(">>> Starting Phase 1: Ingestion & Cleaning...")
     output_dir = "output"
+    if os.path.lexists(output_dir) and not os.path.isdir(output_dir):
+        os.remove(output_dir)
+        
     if not os.path.exists(output_dir):
         os.makedirs(output_dir, exist_ok=True)
         

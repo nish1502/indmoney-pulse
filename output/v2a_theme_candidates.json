@@ -2,29 +2,21 @@
   {
     "batch": 1,
     "themes": [
-      "Payment Issues",
-      "Customer Support",
-      "User Experience",
-      "Features and Fees",
-      "Portfolio Tracking"
+      "Easy To Use",
+      "Poor Support",
+      "Good Features",
+      "Bad Design",
+      "Poor App"
     ]
   },
   {
     "batch": 2,
     "themes": [
+      "Incorrect Data",
       "Hidden Charges",
-      "Poor Service",
-      "Good Design",
-      "Us Stocks",
-      "Bad Experience"
-    ]
-  },
-  {
-    "batch": 3,
-    "themes": [
-      "User Experience",
-      "Technical Issue",
-      "Customer Support"
+      "Poor Services",
+      "Glitchy App",
+      "Easy Interface"
     ]
   }
 ]
