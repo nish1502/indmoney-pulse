@@ -21,16 +21,17 @@ def run_trend_analyzer(current_path="output/v2c_classified_reviews.json", previo
     current_counts = Counter([r["theme"] for r in current_data])
     total_current = len(current_data)
     
-    if not os.path.exists(previous_path):
-        logger.warning("Previous classification file not found. Skipping trend analysis.")
-        return {"status": "no_previous", "message": "No previous data"}
+    previous_counts = Counter()
+    total_previous = 0
+    
+    if os.path.exists(previous_path):
+        with open(previous_path, 'r', encoding='utf-8') as f:
+            previous_data = json.load(f)
+        previous_counts = Counter([r["theme"] for r in previous_data])
+        total_previous = len(previous_data)
+    else:
+        logger.warning("Previous classification file not found. Calculating only current stats.")
 
-    with open(previous_path, 'r', encoding='utf-8') as f:
-        previous_data = json.load(f)
-    
-    previous_counts = Counter([r["theme"] for r in previous_data])
-    total_previous = len(previous_data)
-    
     trends = {}
     all_themes = set(list(current_counts.keys()) + list(previous_counts.keys()))
     
@@ -42,16 +43,20 @@ def run_trend_analyzer(current_path="output/v2c_classified_reviews.json", previo
         trends[theme] = {
             "current_pct": round(curr_p, 1),
             "previous_pct": round(prev_p, 1),
-            "change": round(diff, 1),
-            "direction": "↑" if diff > 0 else "↓" if diff < 0 else "→"
+            "change": round(abs(diff), 1),
+            "direction": "up" if diff > 0 else "down" if diff < 0 else "stable"
         }
         
     output_path = "output/v3_trends.json"
+    if not os.path.exists("output"):
+        os.makedirs("output")
+        
     with open(output_path, 'w', encoding='utf-8') as f:
         json.dump(trends, f, indent=2, ensure_ascii=False)
         
     logger.info(f"Trend analysis complete. Saved to {output_path}.")
     return trends
+
 
 if __name__ == "__main__":
     run_trend_analyzer()

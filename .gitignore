@@ -2,3 +2,10 @@
 __pycache__/
 *.pyc
 .DS_Store
+output/
+frontend/.next/
+frontend/node_modules/
+backend/venv/
+backend/__pycache__/
+.next/
+node_modules/
