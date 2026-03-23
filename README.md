@@ -78,7 +78,7 @@ The system explains the "Exit Load" scenario for INDMoney users with a neutral, 
 
 ---
 
-## 🏁 Milestone 1 Deliverables (Audit Ready)
+## 🏁 Milestone Deliverables (Audit Ready)
 - **Part A: Weekly Review Pulse**:
   - Cluster: Max 5 themes (Top 3 prioritized).
   - Quotes: 3 real user quotes extracted per pulse.
