@@ -15,7 +15,7 @@ def run_trend_analyzer(current_path="output/v2c_classified_reviews.json", previo
         logger.error("Current classification file not found.")
         return {"status": "error", "message": "No current data"}
 
-    with open(current_path, 'r', encoding='utf-8') as f:
+    with open(current_path, 'r', encoding='utf-8', errors='surrogatepass') as f:
         current_data = json.load(f)
     
     current_counts = Counter([r["theme"] for r in current_data])
@@ -25,7 +25,7 @@ def run_trend_analyzer(current_path="output/v2c_classified_reviews.json", previo
     total_previous = 0
     
     if os.path.exists(previous_path):
-        with open(previous_path, 'r', encoding='utf-8') as f:
+        with open(previous_path, 'r', encoding='utf-8', errors='surrogatepass') as f:
             previous_data = json.load(f)
         previous_counts = Counter([r["theme"] for r in previous_data])
         total_previous = len(previous_data)

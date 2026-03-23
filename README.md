@@ -113,5 +113,27 @@ The system explains the "Exit Load" scenario for INDMoney users with a neutral, 
 
 ---
 
+## 🧠 AI Product Thinking: The PM Perspective
+
+Building an AI Pulse system for a FinTech app like **INDMoney** requires balancing automated volume processing with risk-aware synthesis.
+
+### 1. From Noise to Intelligence (Filtering)
+In a typical week, INDMoney receives thousands of reviews, many of which are non-actionable (e.g., "Good app," "Payment failed").
+- **Product Strategy**: The pipeline uses a two-tier LLM engine. Large models (Llama-3-70b) consolidate high-level themes, while fast models (Llama-3-8b) classify individual reviews. This ensures that the generated **Weekly Pulse** reflects the true distribution of friction, not just outliers.
+
+### 2. Constraint-Driven Readability
+Executives and Product Owners don't have time to read 400 reviews.
+- **Decision Matrix**: We enforce a **"Strict 3x3x3"** output constraint. By forcing the AI to select only the top 3 themes, 3 quotes, and 3 ideas, we ensure the report is dense with high-impact "signal."
+
+### 3. Trust Through Neutrality (The Fee Explainer)
+Fee scenarios (like Mutual Fund Exit Loads) are high-risk areas from a support perspective. Incorrect or misleading AI-generated advice can lead to compliance issues. 
+- **Product Safeguard**: The **Fee Explainer** is prompted with a strict "Facts-Only" persona and required to include official INDMoney source links for every bullet point. This ensures the output is verifiable and neutral.
+
+### 4. Human-In-The-Loop Approval Gating
+Automation should not equal total autonomy.
+- **Workflow Control**: We explicitly designed the **Email Draft** and **Intelligence Notes** as "Approval-Gated" actions. An AI can synthesize the data, but a human must trigger the final dispatch to stakeholders. This preserves accountability while unlocking efficiency.
+
+---
+
 ### 🛡️ Disclaimer
 This project is for educational/demonstrative purposes. The fee explanation is generated via AI and should be cross-verified with official documentation before financial decisions. No PII is stored or transmitted.

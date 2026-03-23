@@ -22,7 +22,7 @@ def load_reviews(file_path="output/v1_raw_reviews.json"):
     if not os.path.exists(file_path):
         logger.error(f"Input file not found: {file_path}")
         return []
-    with open(file_path, 'r', encoding='utf-8') as f:
+    with open(file_path, 'r', encoding='utf-8', errors='surrogatepass') as f:
         return json.load(f)
 
 def extract_themes_batch(batch_reviews, max_retries=3):
@@ -84,7 +84,7 @@ def run_phase2a():
         all_batches_results.append({"batch": i//batch_size + 1, "themes": themes})
         
     output_path = "output/v2a_theme_candidates.json"
-    with open(output_path, 'w', encoding='utf-8') as f:
+    with open(output_path, 'w', encoding='utf-8', errors='surrogatepass') as f:
         json.dump(all_batches_results, f, indent=2, ensure_ascii=False)
     logger.info(f"Phase 2A complete. Saved to {output_path}.")
 

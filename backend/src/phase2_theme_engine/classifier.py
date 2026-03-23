@@ -26,10 +26,10 @@ def load_data():
         logger.error("Required input files not found.")
         return [], []
     
-    with open(reviews_path, 'r', encoding='utf-8') as f:
+    with open(reviews_path, 'r', encoding='utf-8', errors='surrogatepass') as f:
         reviews = json.load(f)
     
-    with open(themes_path, 'r', encoding='utf-8') as f:
+    with open(themes_path, 'r', encoding='utf-8', errors='surrogatepass') as f:
         themes_data = json.load(f)
         themes = themes_data.get("final_themes", [])
         

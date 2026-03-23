@@ -24,7 +24,7 @@ def load_classified_reviews(file_path="output/v2c_classified_reviews.json"):
         logger.error(f"Input file not found: {file_path}")
         return []
         
-    with open(file_path, 'r', encoding='utf-8') as f:
+    with open(file_path, 'r', encoding='utf-8', errors='surrogatepass') as f:
         return json.load(f)
 
 def generate_weekly_pulse(reviews, max_retries=3):

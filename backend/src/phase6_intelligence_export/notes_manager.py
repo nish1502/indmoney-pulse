@@ -19,13 +19,13 @@ def append_to_notes(file_path="output/intelligence_notes.md"):
     pulse_report = ""
     pulse_path = "output/v3_weekly_pulse.md"
     if os.path.exists(pulse_path):
-        with open(pulse_path, 'r', encoding='utf-8') as f:
+        with open(pulse_path, 'r', encoding='utf-8', errors='surrogatepass') as f:
             pulse_report = f.read()
             
     fee_data = {}
     fee_path = "output/v5_fee_explanation.json"
     if os.path.exists(fee_path):
-        with open(fee_path, 'r', encoding='utf-8') as f:
+        with open(fee_path, 'r', encoding='utf-8', errors='surrogatepass') as f:
             fee_data = json.load(f)
 
     if not pulse_report and not fee_data:
