@@ -24,11 +24,14 @@ graph TD
         Pipeline --> P1[Phase 1: Ingestion & Cleaning]
         Pipeline --> P2[Phase 2: Theme Engine (Groq/Gemini)]
         Pipeline --> P3[Phase 3: Pulse Generator (Gemini)]
-        Pipeline --> P4[Phase 4: Email Automation]
+        Pipeline --> P4[Phase 4: Email Delivery (SMTP)]
+        Pipeline --> P5[Phase 5: Fee Explainer (LLM)]
+        Pipeline --> P6[Phase 6: Intelligence Export (MCP)]
         
         P1 -- Writing --> Data[(/output JSON/MD Store)]
         P3 -- Reading/Writing --> Data
-        P4 -- Reading --> Data
+        P5 -- Reading/Writing --> Data
+        P6 -- Writing --> Notes[(External Notes/Doc)]
     end
     
     subgraph "External Services"
@@ -36,6 +39,7 @@ graph TD
         P2 --- GeminiAPI(Gemini 2.5 Flash)
         P3 --- GeminiAPI
         P4 --- SMTP(Gmail SMTP Service)
+        P5 --- GeminiAPI
     end
 ```
 
@@ -51,35 +55,27 @@ The central orchestrator transitions from `main.py` to a FastAPI service running
 | :--- | :--- | :--- |
 | `/run` | `POST` | Triggers the full pipeline as a **background task**. Returns immediately. |
 | `/status` | `GET` | Returns current system state (`idle`, `running`, `failed`) and last run metadata. |
-| `/report` | `GET` | Fetches the latest synthesized report and theme data. |
-| `/send-email` | `POST` | Sends the current report to a specified email address. |
+| `/report` | `GET` | Fetches the latest synthesized report, theme data, and fee explanation. |
+| `/send-email` | `POST` | Sends the current report to a specified email address (Approval-Gated in UI). |
+| `/export-notes` | `POST` | Appends current pulse + fee data to a persistent intelligence doc (MCP-simulated). |
 | `/health` | `GET` | Returns system status and API uptime. |
 
 ### 🛠️ Key Architectural Controls
 
-#### A. Execution Model
-The pipeline is executed as a **non-blocking background task** using FastAPI's `BackgroundTasks`. 
-- When `/run` is called, the server acknowledges the request with a `202 Accepted` status and starts the pipeline.
-- The main thread is never blocked, ensuring the API remains responsive.
+#### A. Pipeline Flow (Approval-Gated)
+The system follows an "Extract-Synthesize-Review-Dispatch" model:
+1.  **Extract & Synthesize**: `/run` executes Phases 1, 2, 3, and 5 automatically.
+2.  **Review**: The user reviews the output via the `/report` endpoint on the frontend.
+3.  **Dispatch (Gated)**: Phase 4 (Email) and Phase 6 (Notes Export) are only triggered via explicit user action from the dashboard.
 
-#### B. Status Tracking & Polling
-System state is managed via a dedicated `/status` endpoint.
-- **States:** `idle` (ready), `running` (in-progress), `failed` (error encountered).
-- **Metadata:** Includes `last_run_timestamp` and `last_run_status`.
-- **Client Behavior:** The Next.js frontend uses **polling** (every 3–5 seconds) to check the status rather than persistent WebSockets.
+#### B. Fee Explainer Module (Phase 5)
+A specialized LLM prompt converts raw internal fee structures into a user-friendly 6-bullet explanation.
+- **Scenario Focus**: Covers common charges (e.g., US Stock Withdrawal Fee or Mutual Fund Exit Load).
+- **Compliance**: Uses neutral, facts-only tone with official source links.
 
-#### C. Concurrency Control
-To prevent data corruption and resource exhaustion, the system enforces a **Single Execution Rule**:
-- Only one pipeline run is allowed at any given time.
-- An in-memory lock (Boolean flag) tracks the active state.
-- If `/run` is triggered while the state is `running`, the API returns a `409 Conflict` or simply ignores the request.
-
-#### D. Failure Handling
-The pipeline follows a "Fail Fast" principle:
-- If any phase (1–4) fails, the entire pipeline execution **stops immediately**.
-- The error is captured and logged for debugging.
-- The `/status` endpoint reflects the `failed` state.
-- **Data Integrity:** Since each phase writes to its own versioned file (`v1`, `v2`, etc.), a failure in a later phase does not overwrite or corrupt the successful outputs from the previous run.
+#### C. Intelligence Export (Phase 6 - MCP)
+Simulates a Model Context Protocol (MCP) server integration to append results to external notebooks or documentation systems.
+- **Schema**: `{ date, weekly_pulse, fee_scenario, explanation_bullets, source_links }`.
 
 ---
 
@@ -87,10 +83,10 @@ The pipeline follows a "Fail Fast" principle:
 A modern, responsive web interface built with Next.js and Tailwind CSS.
 
 **Core UI Features:**
-- **Dashboard Overview:** Displays top themes, impact scores, and sentiment trends.
-- **Report Viewer:** Renders the full markdown report dynamically.
-- **Control Center:** Manual trigger button for the pipeline and email delivery.
-- **Progress Tracking:** Uses polling on `/status` to show real-time stage updates to the user.
+- **Dashboard Overview**: Displays top themes, impact scores, and sentiment trends.
+- **Report Viewer**: Renders the full markdown report and fee explanation dynamically.
+- **Control Center**: Manual trigger buttons for the pipeline, email delivery, and notes export.
+- **Progress Tracking**: Uses polling on `/status` to show real-time stage updates to the user.
 
 ---
 
@@ -99,20 +95,16 @@ A modern, responsive web interface built with Next.js and Tailwind CSS.
 ```text
 indmoney-pulse/
 ├── backend/                    # Containerized FastAPI Service
-│   ├── src/                    # Core Pipeline Logic (Phases 1-4)
+│   ├── src/                    # Core Pipeline Logic (Phases 1-6)
+│   │   ├── phase5_fee_explainer/ # Structured Fee Explanations
+│   │   └── phase6_intelligence_export/ # MCP Integration logic
 │   ├── api/                    # FastAPI Routes & Status Management
 │   ├── main.py                 # FastAPI Entry point
 │   ├── Dockerfile              # Backend Container Configuration
 │   └── requirements.txt        # Backend Dependencies
 ├── frontend/                   # Next.js Application
-│   ├── components/             # Reusable UI Blocks
-│   ├── pages/                  # Route-based Views
-│   └── public/                 # Static Assets
 ├── output/                     # JSON & Markdown Data Store (Ephemeral)
 ├── .github/workflows/          # Deployment & Automation
-│   ├── deploy-backend.yml      # Railway Deploy
-│   ├── deploy-frontend.yml     # Vercel Deploy
-│   └── weekly-run.yml          # Scheduler: Checks status -> Triggers /run
 └── .env                        # Environment Variables (Gitignored)
 ```
 
@@ -123,17 +115,10 @@ indmoney-pulse/
 ### Data Persistence Notice
 The `/output` directory is mapped as a local volume in Docker. However, in standard Railway/Docker deployments, this storage is **ephemeral**. 
 - Data will persist across container restarts but may be lost on new deployments or if the disk is wiped.
-- This is acceptable for the current prototype/demo phase; future versions may require S3 or a database for long-term retention.
+- **MCP Integration**: Designed to bridge this gap by pushing final results to persistent external platforms.
 
 ### Scheduling (GitHub Actions)
 The weekly scheduler is updated to be status-aware:
 1. Call `GET /status`.
 2. Proceed to call `POST /run` **only if** the status is `idle`.
 3. Log an alert if the system is stuck in `running` or `failed` state.
-
----
-
-## 🛡️ Non-Functional Requirements
-- **Simplicity:** No complex message queues or external databases are required.
-- **Security:** API keys and credentials managed via cloud-native secrets.
-- **Separation of Concerns:** Frontend is entirely decoupled from Python-specific logic.

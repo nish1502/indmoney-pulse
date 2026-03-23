@@ -37,6 +37,12 @@ interface Report {
   markdown: string;
   trends: Record<string, { current_pct: number; previous_pct: number; change: number; direction: string }>;
   impact: [string, number][];
+  fee: {
+    scenario: string;
+    explanation: string;
+    last_checked: string;
+    source_links: string[];
+  };
   generated_at: string | null;
 }
 
@@ -47,6 +53,7 @@ export default function Dashboard() {
   const [targetEmail, setTargetEmail] = useState("");
   const [triggering, setTriggering] = useState(false);
   const [sendingEmail, setSendingEmail] = useState(false);
+  const [exportingNotes, setExportingNotes] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -115,6 +122,19 @@ export default function Dashboard() {
       alert("Communication error.");
     } finally {
       setSendingEmail(false);
+    }
+  };
+
+  const exportToNotes = async () => {
+    setExportingNotes(true);
+    try {
+      const res = await fetch(`${BACKEND_URL}/export-notes`, { method: "POST" });
+      if (res.ok) alert("Intelligence appended to Notes successfully.");
+      else alert("Notes export failed.");
+    } catch (e) {
+      alert("Communication error.");
+    } finally {
+      setExportingNotes(false);
     }
   };
 
@@ -213,6 +233,38 @@ export default function Dashboard() {
                  )}
                </div>
             </article>
+
+            {/* Fee Explainer Section */}
+            {report?.fee?.scenario && (
+               <section className="bg-gradient-to-br from-indigo-900/10 to-violet-900/10 border border-indigo-500/20 rounded-3xl overflow-hidden p-8 shadow-xl">
+                  <div className="flex items-center justify-between mb-8">
+                     <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-indigo-500/20 text-indigo-400">
+                           <AlertCircle className="h-5 w-5" />
+                        </div>
+                        <h2 className="text-xl font-bold text-white tracking-tight">{report.fee.scenario} Explainer</h2>
+                     </div>
+                     <span className="text-[10px] font-bold text-indigo-400/60 uppercase tracking-widest bg-indigo-500/5 px-2 py-1 rounded">Compliance Verified</span>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-1 gap-8">
+                    <div className="prose prose-invert prose-p:text-zinc-400 prose-li:text-zinc-400 max-w-none">
+                      <ReactMarkdown>{report.fee.explanation}</ReactMarkdown>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-between">
+                     <div className="flex gap-4">
+                        {report.fee.source_links.map((link, idx) => (
+                           <a key={idx} href={link} target="_blank" className="text-[10px] font-bold text-indigo-400 hover:text-indigo-300 flex items-center gap-1 uppercase tracking-wider">
+                             Source {idx + 1} <ExternalLink className="h-2.5 w-2.5" />
+                           </a>
+                        ))}
+                     </div>
+                     <span className="text-[10px] text-zinc-600 font-mono italic">Validated on: {report.fee.last_checked}</span>
+                  </div>
+               </section>
+            )}
           </div>
 
           {/* Sidebar */}
@@ -244,6 +296,15 @@ export default function Dashboard() {
                  >
                    {sendingEmail ? <RefreshCw className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" /> }
                    {sendingEmail ? "Dispatching..." : "Send Intelligence"}
+                 </button>
+                 
+                 <button 
+                  onClick={exportToNotes}
+                  disabled={exportingNotes || !report}
+                  className="w-full bg-zinc-900 hover:bg-zinc-800 border border-white/10 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 group"
+                 >
+                   {exportingNotes ? <Loader2 className="h-4 w-4 animate-spin" /> : <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" /> }
+                   {exportingNotes ? "Appending..." : "Export to Team Notes"}
                  </button>
                </div>
             </div>

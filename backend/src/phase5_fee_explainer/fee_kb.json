@@ -1,0 +1,19 @@
+{
+  "scenario": "Mutual Fund Exit Load",
+  "product": "INDMoney Mutual Funds",
+  "last_checked": "2026-03-23",
+  "facts": [
+    "An exit load is a fee charged by the Asset Management Company (AMC), not INDMoney, when you redeem mutual fund units before a specified period.",
+    "INDMoney charges zero platform fees, zero commissions, and zero withdrawal charges for mutual fund transactions.",
+    "For most Equity Mutual Funds, the exit load is typically 1% if units are redeemed within 12 months (365 days) of investment.",
+    "Debt funds and Liquid funds have much shorter exit load periods, often ranging from 0 to 7 days, depending on the specific fund scheme.",
+    "The exit load is calculated as a percentage of the Net Asset Value (NAV) at the time of redemption and is deducted from the final payout.",
+    "The 'First-In, First-Out' (FIFO) rule applies for redemptions, meaning units bought first are considered redeemed first for exit load calculations."
+  ],
+  "source_links": [
+    "https://www.indmoney.com/articles/mutual-funds/what-is-exit-load-in-mutual-funds",
+    "https://www.indmoney.com/mutual-funds",
+    "https://www.sebi.gov.in/sebi_data/commondocs/may-2021/Clarification%20on%20Exit%20Load_p.pdf",
+    "https://www.kotakmf.com/learning-center/exit-load"
+  ]
+}

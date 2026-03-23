@@ -15,7 +15,7 @@ load_dotenv()
 
 # Imports from src
 from src.phase1_ingestion.scraper import fetch_reviews
-from src.phase1_ingestion.cleaner import clean_reviews
+from src.phase1_ingestion.cleaner import clean_reviews, save_as_csv
 from src.phase2_theme_engine.extractor import run_phase2a
 from src.phase2_theme_engine.consolidator import run_phase2b
 from src.phase2_theme_engine.classifier import run_phase2c
@@ -23,6 +23,8 @@ from src.phase3_pulse_generator.report_generator import run_phase3
 from src.phase3_pulse_generator.trend_analyzer import run_trend_analyzer
 from src.phase3_pulse_generator.impact_scorer import run_impact_scorer
 from src.phase4_automation.email_service import send_email
+from src.phase5_fee_explainer.fee_service import run_phase5
+from src.phase6_intelligence_export.notes_manager import append_to_notes
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -71,6 +73,10 @@ def run_phase1():
     output_path = "output/v1_raw_reviews.json"
     with open(output_path, 'w', encoding='utf-8') as f:
         json.dump(cleaned_reviews, f, indent=2, ensure_ascii=False)
+    
+    # Save as CSV for auditing (Milestone requirement)
+    save_as_csv(cleaned_reviews)
+    
     logger.info(f"Phase 1 completed: {len(cleaned_reviews)} reviews saved.")
 
 def execute_pipeline():
@@ -95,6 +101,7 @@ def execute_pipeline():
         run_phase3()
         run_trend_analyzer()
         run_impact_scorer()
+        run_phase5()
         
         # Optionally send email to default on completion if desired
         # For now, UI handles manual trigger
@@ -144,6 +151,12 @@ def get_report():
     if not os.path.exists(report_path):
         raise HTTPException(status_code=404, detail="No report found.")
     
+    fee_path = "output/v5_fee_explanation.json"
+    fee_data = {}
+    if os.path.exists(fee_path):
+        with open(fee_path, 'r', encoding='utf-8') as f:
+            fee_data = json.load(f)
+    
     with open(report_path, 'r', encoding='utf-8') as f:
         md_content = f.read()
     
@@ -161,6 +174,7 @@ def get_report():
         "markdown": md_content,
         "trends": trends,
         "impact": impact,
+        "fee": fee_data,
         "generated_at": status_manager.last_run_timestamp
     }
 
@@ -173,6 +187,15 @@ def trigger_email(req: EmailRequest):
     except Exception as e:
         logger.error(f"Manual email trigger failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/export-notes")
+def trigger_export():
+    """Manual trigger to append results to intelligence notes (Approval-Gated)."""
+    success = append_to_notes()
+    if success:
+        return {"message": "Weekly Pulse + Fee Explainer appended to Notes."}
+    else:
+        raise HTTPException(status_code=500, detail="Failed to append results to Notes.")
 
 if __name__ == "__main__":
     import uvicorn

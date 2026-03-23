@@ -2,6 +2,7 @@ import re
 import logging
 from langdetect import detect, DetectorFactory
 from datetime import datetime
+import pandas as pd
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -100,6 +101,24 @@ def clean_reviews(reviews):
         
     logger.info(f"Cleaning complete. Kept {len(cleaned_data)} out of {len(reviews)} reviews.")
     return cleaned_data
+
+def save_as_csv(reviews, filename="output/v1_reviews_for_audit.csv"):
+    """
+    Export the cleaned reviews to a CSV format for auditing and external use.
+    """
+    if not reviews:
+        logger.warning("No reviews to save as CSV.")
+        return
+        
+    try:
+        # Create output directory if it doesn't exist
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
+        
+        df = pd.DataFrame(reviews)
+        df.to_csv(filename, index=False, encoding='utf-8-sig')
+        logger.info(f"Successfully saved {len(reviews)} reviews to {filename}")
+    except Exception as e:
+        logger.error(f"Failed to save CSV: {e}")
 
 if __name__ == "__main__":
     # Test sample
