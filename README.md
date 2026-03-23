@@ -91,7 +91,7 @@ The system explains the "Exit Load" scenario for INDMoney users with a neutral, 
   - Sources: 2+ official source links included.
   - Location: `output/v5_fee_explanation.md`.
 - **MCP Actions (Approval-Gated)**:
-  - **Notes Export**: Trigger via `POST /export-notes`. Appends to `output/intelligence_notes.md`.
+  - **Notes Export**: Trigger via `POST /export-notes`. Appends to [Intelligence Notes (Google Doc)](https://docs.google.com/document/d/1RMykvBNNDAISDTKWdZULlbuocw7wyO-gh1w7WOqO3Rc/edit?usp=sharing) and `output/intelligence_notes.md`.
   - **Email Draft**: Trigger via `POST /send-email`. Delivers via Gmail SMTP.
   - *All actions require manual trigger via the UI or API, satisfying the "approval-gated" requirement.*
 - **Data Samples**:

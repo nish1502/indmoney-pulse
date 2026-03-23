@@ -14,31 +14,31 @@ The updated architecture separates the pipeline logic into a stateless FastAPI b
 
 ```mermaid
 graph TD
-    User([User/Browser]) <--> Frontend[Next.js Frontend - Vercel]
-    GitHubActions[GitHub Actions Scheduler] -- 1. GET /status --> Backend
-    GitHubActions -- 2. POST /run --> Backend
-    Frontend -- API Polling --> Backend[FastAPI Backend - Railway/Docker]
+    User["User/Browser"] <--> Frontend["Next.js Frontend (Vercel)"]
+    GitHubActions["GitHub Actions Scheduler"] -- "1. GET /status" --> Backend
+    GitHubActions -- "2. POST /run" --> Backend
+    Frontend -- "API Polling" --> Backend["FastAPI Backend (Railway/Docker)"]
     
     subgraph "FastAPI Backend Layer"
-        Backend --> Pipeline[Core Processing Pipeline]
-        Pipeline --> P1[Phase 1: Ingestion & Cleaning]
-        Pipeline --> P2[Phase 2: Theme Engine (Groq/Gemini)]
-        Pipeline --> P3[Phase 3: Pulse Generator (Gemini)]
-        Pipeline --> P4[Phase 4: Email Delivery (SMTP)]
-        Pipeline --> P5[Phase 5: Fee Explainer (LLM)]
-        Pipeline --> P6[Phase 6: Intelligence Export (MCP)]
+        Backend --> Pipeline["Core Processing Pipeline"]
+        Pipeline --> P1["Phase 1: Ingestion & Cleaning"]
+        Pipeline --> P2["Phase 2: Theme Engine (Groq/Gemini)"]
+        Pipeline --> P3["Phase 3: Pulse Generator (Gemini)"]
+        Pipeline --> P4["Phase 4: Email Delivery (SMTP)"]
+        Pipeline --> P5["Phase 5: Fee Explainer (LLM)"]
+        Pipeline --> P6["Phase 6: Intelligence Export (MCP)"]
         
-        P1 -- Writing --> Data[(/output JSON/MD Store)]
-        P3 -- Reading/Writing --> Data
-        P5 -- Reading/Writing --> Data
-        P6 -- Writing --> Notes[(External Notes/Doc)]
+        P1 -- "Writing" --> Data[("/output JSON/MD Store")]
+        P3 -- "Reading/Writing" --> Data
+        P5 -- "Reading/Writing" --> Data
+        P6 -- "Writing" --> Notes["External Notes/Doc"]
     end
     
     subgraph "External Services"
-        P2 --- GroqAPI(Groq Llama-3-70b)
-        P2 --- GeminiAPI(Gemini 2.5 Flash)
+        P2 --- GroqAPI("Groq Llama-3-70b")
+        P2 --- GeminiAPI("Gemini 2.5 Flash")
         P3 --- GeminiAPI
-        P4 --- SMTP(Gmail SMTP Service)
+        P4 --- SMTP("Gmail SMTP Service")
         P5 --- GeminiAPI
     end
 ```
