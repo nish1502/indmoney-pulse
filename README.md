@@ -2,6 +2,14 @@
 
 **INDMoney Pulse** is an AI-powered pipeline that transforms thousands of Play Store reviews into a sharp executive report, identifies key product themes, and provides structured explanations for common fee scenarios.
 
+## 🏗️ System Overview
+
+- **Frontend (Next.js)**: [indmoney-pulse.vercel.app](https://indmoney-pulse.vercel.app/)
+- **Backend (FastAPI)**: [indmoney-pulse-production.up.railway.app/docs](https://indmoney-pulse-production.up.railway.app/docs)
+
+> [!IMPORTANT]
+> **Deployment Notice**: Phase 4 (Email SMTP) and Phase 6 (Intelligence Notes Export) are only operational in the **Local Development Environment**. These features are disabled in the Railway/Vercel production build due to free-tier outbound port restrictions and ephemeral storage limitations.
+
 ---
 
 ## 🏗️ Architecture Overview
@@ -71,8 +79,39 @@ The system explains the "Exit Load" scenario for INDMoney users with a neutral, 
 ---
 
 ## 🏁 Milestone 1 Deliverables (Audit Ready)
-- **Weekly Note**: Found in `backend/output/v3_weekly_pulse.md`.
-- **Fee Explainer**: Found in `backend/output/v5_fee_explanation.md`.
-- **Intelligence Notes**: Found in `backend/output/intelligence_notes.md`.
-- **Reviews CSV**: Exported to `backend/output/v1_reviews_for_audit.csv`.
-- **Approval Gating**: Handled via the manual triggers on the Next.js Dashboard.
+- **Part A: Weekly Review Pulse**:
+  - Cluster: Max 5 themes (Top 3 prioritized).
+  - Quotes: 3 real user quotes extracted per pulse.
+  - Action ideas: 3 specific action ideas generated.
+  - Report: `< 250 words` executive summary.
+  - Location: `output/v3_weekly_pulse.md`.
+- **Part B: Fee Explainer**:
+  - Scenario: Mutual Fund Exit Load for INDMoney users.
+  - Format: Structured ≤6 bullet explanation.
+  - Sources: 2+ official source links included.
+  - Location: `output/v5_fee_explanation.md`.
+- **MCP Actions (Approval-Gated)**:
+  - **Notes Export**: Trigger via `POST /export-notes`. Appends to `output/intelligence_notes.md`.
+  - **Email Draft**: Trigger via `POST /send-email`. Delivers via Gmail SMTP.
+  - *All actions require manual trigger via the UI or API, satisfying the "approval-gated" requirement.*
+- **Data Samples**:
+  - Reviews CSV: `output/v1_reviews_for_audit.csv` (Last 12 weeks, English-only, Redacted PII, >5 words).
+- **Source List (Official)**:
+  - [INDMoney - What is Exit Load in Mutual Funds?](https://www.indmoney.com/articles/mutual-funds/what-is-exit-load-in-mutual-funds)
+  - [INDMoney Mutual Fund App FAQs](https://www.indmoney.com/mutual-funds)
+  - [SEBI Guidelines on Exit Load](https://www.sebi.gov.in/)
+  - [Kotak Mutual Fund - Understanding Exit Load](https://www.kotakmf.com/learning-center/exit-load)
+  - [AMFI India - Mutual Fund Basics](https://www.amfiindia.com/web/aboutus)
+
+---
+
+## 🛠️ How to Re-Run & Approve
+1.  **Trigger Analysis**: `curl -X POST http://localhost:8001/run`. Wait for `GET /status` to return `idle`.
+2.  **Approve Email**: `curl -X POST http://localhost:8001/send-email -H "Content-Type: application/json" -d '{"recipient": "your_email@example.com"}'`.
+3.  **Approve Notes Export**: `curl -X POST http://localhost:8001/export-notes`.
+4.  **View Results**: Checks the `output/` directory for updated artifacts.
+
+---
+
+### 🛡️ Disclaimer
+This project is for educational/demonstrative purposes. The fee explanation is generated via AI and should be cross-verified with official documentation before financial decisions. No PII is stored or transmitted.

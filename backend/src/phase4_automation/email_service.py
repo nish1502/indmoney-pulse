@@ -67,15 +67,28 @@ def send_email(recipient: str = None):
     Orchestrate the process and send via Gmail SMTP.
     If recipient is provided, use it. Otherwise, fallback to EMAIL_ID.
     """
-    # 1. Load report
-    content = load_report()
-    if not content:
+    # 1. Load pulse report
+    pulse_content = load_report()
+    if not pulse_content:
+        logger.error("Pulse report not found. Skipping email.")
         return
     
-    # 2. Format it
-    formatted_body = format_email(content)
+    # 2. Load fee explanation
+    fee_content = ""
+    fee_path = "output/v5_fee_explanation.md"
+    if os.path.exists(fee_path):
+        with open(fee_path, "r", encoding="utf-8") as f:
+            fee_content = f.read()
+
+    # 3. Format it
+    formatted_pulse = format_email(pulse_content)
     
-    # 3. SMTP Config
+    # Required Body: Weekly pulse + Fee explanation
+    final_body = f"--- WEEKLY PULSE ---\n{formatted_pulse}\n\n"
+    if fee_content:
+        final_body += f"--- FEE EXPLANATION ---\n{fee_content}\n"
+    
+    # 4. SMTP Config
     email_id = os.getenv("EMAIL_ID")
     email_password = os.getenv("EMAIL_PASSWORD")
     smtp_server = "smtp.gmail.com"
@@ -85,17 +98,18 @@ def send_email(recipient: str = None):
         logger.error("Email credentials (EMAIL_ID/EMAIL_PASSWORD) not found in .env.")
         return
 
-    # 4. Prepare email message
+    # 5. Prepare email message
     msg = MIMEMultipart()
     msg['From'] = email_id
-    msg['To'] = recipient if recipient else email_id # Use custom recipient if provided
-    msg['Subject'] = "INDMoney Weekly Product Pulse"
+    msg['To'] = recipient if recipient else email_id
+    # Required Subject Schema: Weekly Pulse + Fee Explainer — [Product Name]
+    msg['Subject'] = "Weekly Pulse + Fee Explainer — INDMoney"
     
-    msg.attach(MIMEText(formatted_body, 'plain'))
+    msg.attach(MIMEText(final_body, 'plain'))
     
-    # 5. Send using smtplib
+    # 6. Send using smtplib
     with smtplib.SMTP(smtp_server, smtp_port) as server:
-        server.set_debuglevel(0) # Set to 0 for clean production output
+        server.set_debuglevel(0)
         server.starttls()
         server.login(email_id, email_password)
         server.send_message(msg)

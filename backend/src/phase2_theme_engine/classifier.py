@@ -73,21 +73,41 @@ Themes: [{themes_str}]
         try:
             response = client.chat.completions.create(
                 model="llama-3.1-8b-instant",
-                messages=[{"role": "user", "content": "You are a classification engine. You output valid JSON list of objects only."},
+                messages=[{"role": "user", "content": "You are a classification engine. You output valid JSON list of objects ONLY."},
                           {"role": "user", "content": prompt}],
-                response_format={"type": "json_object"}
+                # Removed response_format strictly because llama-3-8b sometimes 
+                # returns an object even if asked for a list
             )
             content = response.choices[0].message.content
+            # Clean possible markdown wrap
+            if "```json" in content:
+                content = content.split("```json")[1].split("```")[0]
+            elif "```" in content:
+                content = content.split("```")[1].split("```")[0]
+            
             classified = json.loads(content.strip())
             
+            # Normalize: If it's a dict with one key containing the list
             if isinstance(classified, dict):
+                 # Look for any list in values
+                 found_list = False
                  for key in classified:
                      if isinstance(classified[key], list):
                          classified = classified[key]
+                         found_list = True
                          break
+                 if not found_list:
+                     logger.warning(f"Batch {attempt+1} did not return a list. Retrying.")
+                     continue
             
+            if not isinstance(classified, list):
+                logger.warning(f"Batch {attempt+1} is not a list. Retrying.")
+                continue
+
             valid_classified = []
             for item in classified:
+                if not isinstance(item, dict):
+                    continue
                 theme = item.get("theme")
                 if theme in themes:
                     valid_classified.append({
@@ -96,10 +116,13 @@ Themes: [{themes_str}]
                         "theme": theme
                     })
             
-            return valid_classified
+            if valid_classified:
+                return valid_classified
+            
+            logger.warning(f"No valid classified items in batch {attempt+1}.")
         except Exception as e:
             logger.warning(f"Classification attempt {attempt + 1} failed: {e}")
-            time.sleep(10) # 10s wait for 429
+            time.sleep(15) # Wait for 429
             
     return []
 
