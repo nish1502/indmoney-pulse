@@ -98,7 +98,7 @@ def run_phase5():
         output_path = "output/v5_fee_explanation.md"
         # Ensure output dir exists (main pipe handles this usually)
         os.makedirs("output", exist_ok=True)
-        with open(output_path, 'w', encoding='utf-8') as f:
+        with open(output_path, 'w', encoding='utf-8', errors='surrogatepass') as f:
             f.write(explanation)
         
         # Also save as structured JSON for API
@@ -108,8 +108,8 @@ def run_phase5():
             "explanation": explanation,
             "source_links": kb_data['source_links'][:2]
         }
-        with open("output/v5_fee_explanation.json", 'w', encoding='utf-8') as f:
-            json.dump(json_output, f, indent=2)
+        with open("output/v5_fee_explanation.json", 'w', encoding='utf-8', errors='surrogatepass') as f:
+            json.dump(json_output, f, indent=2, ensure_ascii=False)
             
         logger.info(f"Phase 5 complete. Fee explanation saved to {output_path}.")
         return json_output

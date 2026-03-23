@@ -22,6 +22,15 @@ def _strip_emojis(text):
     emoji_pattern = r'[^\x00-\x7F]+'
     return re.sub(emoji_pattern, '', text).strip()
 
+def _strip_surrogates(text):
+    """
+    Remove lone surrogates (U+D800 - U+DFFF) which cause 'utf-8' encoding errors.
+    """
+    if not text:
+        return ""
+    # This encodes to utf-8 while ignoring surrogates, then decodes back
+    return text.encode('utf-8', 'ignore').decode('utf-8')
+
 def _remove_pii(text):
     """
     Remove emails and phone numbers from the review text.
@@ -95,7 +104,7 @@ def clean_reviews(reviews):
             
         # Success: Add to cleaned data
         cleaned_data.append({
-            "review": review_text,
+            "review": _strip_surrogates(review_text),
             "date": review_date
         })
         

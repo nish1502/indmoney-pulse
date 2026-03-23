@@ -72,7 +72,7 @@ def append_to_notes(file_path="output/intelligence_notes.md"):
     # 5. Fallback: Append to File
     os.makedirs("output", exist_ok=True)
     try:
-        with open(file_path, "a", encoding="utf-8") as f:
+        with open(file_path, "a", encoding="utf-8", errors='surrogatepass') as f:
             f.write(entry)
         logger.info(f"Successfully appended entry to {file_path}")
         return True

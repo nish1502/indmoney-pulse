@@ -107,7 +107,7 @@ def run_phase3():
     
     if report:
         output_path = "output/v3_weekly_pulse.md"
-        with open(output_path, 'w', encoding='utf-8') as f:
+        with open(output_path, 'w', encoding='utf-8', errors='surrogatepass') as f:
             f.write(report)
         logger.info(f"Phase 3 complete. Report saved to {output_path}.")
     else:

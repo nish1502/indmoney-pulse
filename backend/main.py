@@ -71,7 +71,7 @@ def run_phase1():
         
     cleaned_reviews = clean_reviews(raw_reviews)
     output_path = "output/v1_raw_reviews.json"
-    with open(output_path, 'w', encoding='utf-8') as f:
+    with open(output_path, 'w', encoding='utf-8', errors='surrogatepass') as f:
         json.dump(cleaned_reviews, f, indent=2, ensure_ascii=False)
     
     # Save as CSV for auditing (Milestone requirement)

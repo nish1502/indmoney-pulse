@@ -125,9 +125,10 @@ def run_phase2c():
         logger.info(f"Processing batch {i//batch_size + 1}/{(len(reviews)-1)//batch_size + 1}...")
         results = classify_batch(batch, themes)
         all_classified.extend(results)
+        time.sleep(2) # 2s wait between batches to avoid 429
         
     output_path = "output/v2c_classified_reviews.json"
-    with open(output_path, 'w', encoding='utf-8') as f:
+    with open(output_path, 'w', encoding='utf-8', errors='surrogatepass') as f:
         json.dump(all_classified, f, indent=2, ensure_ascii=False)
         
     logger.info(f"Phase 2C complete. Results saved to {output_path}.")
